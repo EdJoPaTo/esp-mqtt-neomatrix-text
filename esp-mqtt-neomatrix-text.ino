@@ -21,7 +21,8 @@ const bool mqtt_retained = true;
 #define BASIC_TOPIC_SET BASIC_TOPIC "set/"
 #define BASIC_TOPIC_STATUS BASIC_TOPIC "status/"
 
-const int PIN = 13;
+const int PIN_MATRIX = 13; // D7
+const int PIN_ON = 5; // D1
 
 // MATRIX DECLARATION:
 // Parameter 1 = width of NeoPixel matrix
@@ -48,7 +49,7 @@ const int PIN = 13;
 // Arduino.  When held that way, the first pixel is at the top right, and
 // lines are arranged in columns, progressive order.  The shield uses
 // 800 KHz (v2) pixels that expect GRB color data.
-Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32, 8, PIN,
+Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32, 8, PIN_MATRIX,
   NEO_MATRIX_BOTTOM     + NEO_MATRIX_RIGHT +
   NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
   NEO_GRB            + NEO_KHZ800);
@@ -70,6 +71,7 @@ bool isTextLongerThanMatrix() {
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  pinMode(PIN_ON, OUTPUT);
   Serial.begin(115200);
   matrix.begin();
   matrix.setTextWrap(false);
@@ -138,6 +140,8 @@ void onConnectionEstablished() {
 
 void loop() {
   client.loop();
+
+  digitalWrite(PIN_ON, on ? HIGH : LOW);
 
   matrix.fillScreen(0);
   matrix.setCursor(x, 0);
