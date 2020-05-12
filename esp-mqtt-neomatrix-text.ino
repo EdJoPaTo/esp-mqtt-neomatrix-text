@@ -149,15 +149,14 @@ void loop() {
   matrix.setTextColor(matrix.ColorHSV(hue * 182, sat * 2.55, bri * on));
   matrix.show();
 
-  if (on && isTextLongerThanMatrix()) {
+  if (isTextLongerThanMatrix()) {
     x -= 1;
     if (x < -textPixelWidth()) {
       x = matrix.width();
     }
-
-    delay(50);
   } else {
     x = 0;
-    delay(500);
   }
+
+  delay(50);
 }
