@@ -54,6 +54,8 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32, 8, PIN_MATRIX,
   NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
   NEO_GRB            + NEO_KHZ800);
 
+const uint8_t BRIGHTNESS_OFFSET = 3;
+
 String text = "hey!";
 uint16_t hue = 120; // green
 uint8_t sat = 100;
@@ -78,7 +80,7 @@ void setup() {
   //matrix.setBrightness(50);
 
   matrix.setCursor(0, 0);
-  matrix.setTextColor(ColorHSV(hue * 182, sat * 2.55, bri * on));
+  matrix.setTextColor(ColorHSV(hue * 182, sat * 2.55, (bri + BRIGHTNESS_OFFSET) * on));
   matrix.print(text);
   matrix.show();
 
@@ -146,7 +148,7 @@ void loop() {
   matrix.fillScreen(0);
   matrix.setCursor(x, 0);
   matrix.print(text);
-  matrix.setTextColor(ColorHSV(hue * 182, sat * 2.55, bri * on));
+  matrix.setTextColor(ColorHSV(hue * 182, sat * 2.55, (bri + BRIGHTNESS_OFFSET) * on));
   matrix.show();
 
   if (isTextLongerThanMatrix()) {
