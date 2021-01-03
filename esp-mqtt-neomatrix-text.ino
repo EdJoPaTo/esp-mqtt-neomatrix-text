@@ -54,7 +54,7 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32, 8, PIN_MATRIX,
   NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
   NEO_GRB            + NEO_KHZ800);
 
-const uint8_t BRIGHTNESS_OFFSET = 3;
+const uint8_t BRIGHTNESS_OFFSET = 7;
 
 String text = "hey!";
 uint16_t hue = 120; // green
