@@ -91,26 +91,29 @@ void setup() {
 
 void onConnectionEstablished() {
   client.subscribe(BASIC_TOPIC_SET "hue", [](const String & payload) {
-    int newHue = strtol(payload.c_str(), 0, 10);
-    if (hue != newHue) {
-      hue = newHue;
-      client.publish(BASIC_TOPIC_STATUS "hue", payload, mqtt_retained);
+    int parsed = strtol(payload.c_str(), 0, 10);
+    int newValue = parsed % 360;
+    if (hue != newValue) {
+      hue = newValue;
+      client.publish(BASIC_TOPIC_STATUS "hue", String(hue), mqtt_retained);
     }
   });
 
   client.subscribe(BASIC_TOPIC_SET "sat", [](const String & payload) {
-    int newSat = strtol(payload.c_str(), 0, 10);
-    if (sat != newSat) {
-      sat = newSat;
-      client.publish(BASIC_TOPIC_STATUS "sat", payload, mqtt_retained);
+    int parsed = strtol(payload.c_str(), 0, 10);
+    int newValue = max(0, min(100, parsed));
+    if (sat != newValue) {
+      sat = newValue;
+      client.publish(BASIC_TOPIC_STATUS "sat", String(sat), mqtt_retained);
     }
   });
 
   client.subscribe(BASIC_TOPIC_SET "bri", [](const String & payload) {
-    int newBri = strtol(payload.c_str(), 0, 10);
-    if (bri != newBri) {
-      bri = newBri;
-      client.publish(BASIC_TOPIC_STATUS "bri", payload, mqtt_retained);
+    int parsed = strtol(payload.c_str(), 0, 10);
+    int newValue = max(0, min(255 - BRIGHTNESS_OFFSET, parsed));
+    if (bri != newValue) {
+      bri = newValue;
+      client.publish(BASIC_TOPIC_STATUS "bri", String(bri), mqtt_retained);
     }
   });
 
@@ -118,7 +121,7 @@ void onConnectionEstablished() {
     boolean newOn = payload != "0";
     if (on != newOn) {
       on = newOn;
-      client.publish(BASIC_TOPIC_STATUS "on", payload, mqtt_retained);
+      client.publish(BASIC_TOPIC_STATUS "on", on ? "1" : "0", mqtt_retained);
     }
   });
 
@@ -126,7 +129,7 @@ void onConnectionEstablished() {
     if (text != payload) {
       text = payload;
       x = isTextLongerThanMatrix() ? matrix.width() : 0;
-      client.publish(BASIC_TOPIC_STATUS "text", payload, mqtt_retained);
+      client.publish(BASIC_TOPIC_STATUS "text", String(text), mqtt_retained);
     }
   });
 
