@@ -163,7 +163,7 @@ void loop() {
     x = 0;
   }
 
-  delay(50);
+  delay(10);
 }
 
 uint16_t ColorHSV(uint16_t hue, uint8_t sat, uint8_t val) {
