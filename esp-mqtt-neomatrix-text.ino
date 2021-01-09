@@ -1,6 +1,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
+#include <ArduinoOTA.h>
 #include <credentials.h>
 #include <EspMQTTClient.h>
 
@@ -85,6 +86,9 @@ void setup() {
   matrix.print(text);
   matrix.show();
 
+  ArduinoOTA.setHostname(CLIENT_NAME);
+  ArduinoOTA.begin();
+
   // Optional functionnalities of EspMQTTClient
   client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
   client.enableLastWillMessage(BASIC_TOPIC "connected", "0", mqtt_retained);  // You can activate the retain flag by setting the third parameter to true
@@ -146,6 +150,7 @@ void onConnectionEstablished() {
 
 void loop() {
   client.loop();
+  ArduinoOTA.handle();
 
   digitalWrite(PIN_ON, on ? HIGH : LOW);
 
