@@ -1,16 +1,17 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
+#include <credentials.h>
 #include <EspMQTTClient.h>
 
 #define CLIENT_NAME "espMatrix"
 
 EspMQTTClient client(
-  "WifiSSID",
-  "WifiPassword",
-  "192.168.1.100",  // MQTT Broker server ip
-  "MQTTUsername",   // Can be omitted if not needed
-  "MQTTPassword",   // Can be omitted if not needed
+  WIFI_SSID,
+  WIFI_PASSWORD,
+  MQTT_SERVER,   // MQTT Broker server ip
+  MQTT_USERNAME, // Can be omitted if not needed
+  MQTT_PASSWORD, // Can be omitted if not needed
   CLIENT_NAME, // Client name that uniquely identify your device
   1883 // The MQTT port, default to 1883. this line can be omitted
 );
