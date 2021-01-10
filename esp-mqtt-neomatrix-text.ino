@@ -87,7 +87,6 @@ void setup() {
   matrix.show();
 
   ArduinoOTA.setHostname(CLIENT_NAME);
-  ArduinoOTA.begin();
 
   // Optional functionnalities of EspMQTTClient
   client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
@@ -145,6 +144,7 @@ void onConnectionEstablished() {
   client.publish(BASIC_TOPIC_STATUS "on", on ? "1" : "0", mqtt_retained);
   // client.publish(BASIC_TOPIC_STATUS "text", text, mqtt_retained);
 
+  ArduinoOTA.begin();
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
