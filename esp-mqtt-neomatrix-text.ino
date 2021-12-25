@@ -45,8 +45,6 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32, 8, PIN_MATRIX,
   NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
   NEO_GRB            + NEO_KHZ800);
 
-const uint8_t BRIGHTNESS_OFFSET = 7;
-
 String text = "hey!";
 uint16_t hue = 120; // green
 uint8_t sat = 100;
@@ -68,7 +66,7 @@ void setup() {
   Serial.begin(115200);
 
   matrix.begin();
-  matrix.setBrightness((bri + BRIGHTNESS_OFFSET) * on);
+  matrix.setBrightness(bri * on);
   matrix.setCursor(0, 0);
   matrix.setTextColor(ColorHSV(hue * 182, sat * 2.55, 255));
   matrix.setTextWrap(false);
@@ -104,10 +102,10 @@ void onConnectionEstablished() {
 
   client.subscribe(BASIC_TOPIC_SET "bri", [](const String &payload) {
     int parsed = strtol(payload.c_str(), 0, 10);
-    uint8_t newValue = max(0, min(255 - BRIGHTNESS_OFFSET, parsed));
+    uint8_t newValue = max(0, min(255, parsed));
     if (bri != newValue) {
       bri = newValue;
-      matrix.setBrightness((bri + BRIGHTNESS_OFFSET) * on);
+      matrix.setBrightness(bri * on);
       client.publish(BASIC_TOPIC_STATUS "bri", String(bri), MQTT_RETAINED);
     }
   });
@@ -116,7 +114,7 @@ void onConnectionEstablished() {
     boolean newValue = payload != "0";
     if (on != newValue) {
       on = newValue;
-      matrix.setBrightness((bri + BRIGHTNESS_OFFSET) * on);
+      matrix.setBrightness(bri * on);
       client.publish(BASIC_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
     }
   });
