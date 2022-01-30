@@ -80,6 +80,14 @@ void setup() {
 }
 
 void onConnectionEstablished() {
+  client.subscribe(BASIC_TOPIC_SET "text", [](const String &payload) {
+    if (text != payload) {
+      text = payload;
+      x = isTextLongerThanMatrix() ? matrix.width() : 0;
+      client.publish(BASIC_TOPIC_STATUS "text", String(text), MQTT_RETAINED);
+    }
+  });
+
   client.subscribe(BASIC_TOPIC_SET "hue", [](const String &payload) {
     int parsed = strtol(payload.c_str(), 0, 10);
     uint16_t newValue = parsed % 360;
@@ -119,20 +127,12 @@ void onConnectionEstablished() {
     }
   });
 
-  client.subscribe(BASIC_TOPIC_SET "text", [](const String &payload) {
-    if (text != payload) {
-      text = payload;
-      x = isTextLongerThanMatrix() ? matrix.width() : 0;
-      client.publish(BASIC_TOPIC_STATUS "text", String(text), MQTT_RETAINED);
-    }
-  });
-
-  client.publish(BASIC_TOPIC "connected", "2", MQTT_RETAINED);
+  // client.publish(BASIC_TOPIC_STATUS "text", text, MQTT_RETAINED);
   client.publish(BASIC_TOPIC_STATUS "hue", String(hue), MQTT_RETAINED);
   client.publish(BASIC_TOPIC_STATUS "sat", String(sat), MQTT_RETAINED);
   client.publish(BASIC_TOPIC_STATUS "bri", String(bri), MQTT_RETAINED);
   client.publish(BASIC_TOPIC_STATUS "on", on ? "1" : "0", MQTT_RETAINED);
-  // client.publish(BASIC_TOPIC_STATUS "text", text, MQTT_RETAINED);
+  client.publish(BASIC_TOPIC "connected", "2", MQTT_RETAINED);
 }
 
 void loop() {
