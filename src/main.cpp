@@ -2,6 +2,7 @@
 #include <EspMQTTClient.h>
 #include <FastLED_NeoMatrix.h>
 #include <FastLED.h>
+#include <MqttKalmanPublish.h>
 
 #define CLIENT_NAME "espMatrix"
 const bool MQTT_RETAINED = true;
@@ -38,6 +39,8 @@ CRGB leds[WIDTH * HEIGHT];
 FastLED_NeoMatrix matrix = FastLED_NeoMatrix(leds, WIDTH, HEIGHT,
   NEO_MATRIX_BOTTOM  + NEO_MATRIX_RIGHT +
   NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG);
+
+MQTTKalmanPublish mkRssi(client, BASE_TOPIC_STATUS "rssi", MQTT_RETAINED, 12 * 5 /* every 5 min */, 10);
 
 String text = "hey!";
 uint16_t hue = 120; // green
@@ -159,6 +162,15 @@ void loop() {
   if (!client.isConnected()) {
     // Keep content until it is connected and updates again
     return;
+  }
+
+  auto now = millis();
+  static unsigned long nextMeasure = 0;
+  if (now >= nextMeasure) {
+    nextMeasure = now + 5000;
+    long rssi = WiFi.RSSI();
+    float avgRssi = mkRssi.addMeasurement(rssi);
+    Serial.printf("RSSI        in     dBm: %3ld   Average: %6.2f\n", rssi, avgRssi);
   }
 
   matrix.show();
