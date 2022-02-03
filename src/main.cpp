@@ -15,9 +15,9 @@ EspMQTTClient client(
     1883           // The MQTT port, default to 1883. this line can be omitted
 );
 
-#define BASIC_TOPIC CLIENT_NAME "/"
-#define BASIC_TOPIC_SET BASIC_TOPIC "set/"
-#define BASIC_TOPIC_STATUS BASIC_TOPIC "status/"
+#define BASE_TOPIC CLIENT_NAME "/"
+#define BASE_TOPIC_SET BASE_TOPIC "set/"
+#define BASE_TOPIC_STATUS BASE_TOPIC "status/"
 
 const int PIN_MATRIX = 13; // D7
 const int PIN_ON = 5;      // D1
@@ -60,6 +60,9 @@ bool isTextLongerThanMatrix() {
   return textPixelWidth() > matrix.width();
 }
 
+// Defined below
+uint16_t ColorHSV(uint16_t hue, uint8_t sat, uint8_t val);
+
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(PIN_ON, OUTPUT);
@@ -71,68 +74,68 @@ void setup() {
   matrix.setTextColor(ColorHSV(hue * 182, sat * 2.55, 255));
   matrix.setTextWrap(false);
   matrix.print(text);
-  matrix.show();
 
   client.enableDebuggingMessages();
   client.enableHTTPWebUpdater();
   client.enableOTA();
-  client.enableLastWillMessage(BASIC_TOPIC "connected", "0", MQTT_RETAINED);
+  client.enableLastWillMessage(BASE_TOPIC "connected", "0", MQTT_RETAINED);
 }
 
 void onConnectionEstablished() {
-  client.subscribe(BASIC_TOPIC_SET "text", [](const String &payload) {
+  client.subscribe(BASE_TOPIC_SET "text", [](const String &payload) {
     if (text != payload) {
       text = payload;
       x = isTextLongerThanMatrix() ? matrix.width() : 0;
-      client.publish(BASIC_TOPIC_STATUS "text", String(text), MQTT_RETAINED);
+      client.publish(BASE_TOPIC_STATUS "text", String(text), MQTT_RETAINED);
     }
   });
 
-  client.subscribe(BASIC_TOPIC_SET "hue", [](const String &payload) {
+  client.subscribe(BASE_TOPIC_SET "hue", [](const String &payload) {
     int parsed = strtol(payload.c_str(), 0, 10);
     uint16_t newValue = parsed % 360;
     if (hue != newValue) {
       hue = newValue;
       matrix.setTextColor(ColorHSV(hue * 182, sat * 2.55, 255));
-      client.publish(BASIC_TOPIC_STATUS "hue", String(hue), MQTT_RETAINED);
+      client.publish(BASE_TOPIC_STATUS "hue", String(hue), MQTT_RETAINED);
     }
   });
 
-  client.subscribe(BASIC_TOPIC_SET "sat", [](const String &payload) {
+  client.subscribe(BASE_TOPIC_SET "sat", [](const String &payload) {
     int parsed = strtol(payload.c_str(), 0, 10);
     uint8_t newValue = max(0, min(100, parsed));
     if (sat != newValue) {
       sat = newValue;
       matrix.setTextColor(ColorHSV(hue * 182, sat * 2.55, 255));
-      client.publish(BASIC_TOPIC_STATUS "sat", String(sat), MQTT_RETAINED);
+      client.publish(BASE_TOPIC_STATUS "sat", String(sat), MQTT_RETAINED);
     }
   });
 
-  client.subscribe(BASIC_TOPIC_SET "bri", [](const String &payload) {
+  client.subscribe(BASE_TOPIC_SET "bri", [](const String &payload) {
     int parsed = strtol(payload.c_str(), 0, 10);
     uint8_t newValue = max(0, min(255, parsed));
     if (bri != newValue) {
       bri = newValue;
       matrix.setBrightness(bri * on);
-      client.publish(BASIC_TOPIC_STATUS "bri", String(bri), MQTT_RETAINED);
+      client.publish(BASE_TOPIC_STATUS "bri", String(bri), MQTT_RETAINED);
     }
   });
 
-  client.subscribe(BASIC_TOPIC_SET "on", [](const String &payload) {
+  client.subscribe(BASE_TOPIC_SET "on", [](const String &payload) {
     boolean newValue = payload != "0";
     if (on != newValue) {
       on = newValue;
       matrix.setBrightness(bri * on);
-      client.publish(BASIC_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
+      client.publish(BASE_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
     }
   });
 
-  // client.publish(BASIC_TOPIC_STATUS "text", text, MQTT_RETAINED);
-  client.publish(BASIC_TOPIC_STATUS "hue", String(hue), MQTT_RETAINED);
-  client.publish(BASIC_TOPIC_STATUS "sat", String(sat), MQTT_RETAINED);
-  client.publish(BASIC_TOPIC_STATUS "bri", String(bri), MQTT_RETAINED);
-  client.publish(BASIC_TOPIC_STATUS "on", on ? "1" : "0", MQTT_RETAINED);
-  client.publish(BASIC_TOPIC "connected", "2", MQTT_RETAINED);
+  // client.publish(BASE_TOPIC_STATUS "text", text, MQTT_RETAINED);
+  client.publish(BASE_TOPIC_STATUS "hue", String(hue), MQTT_RETAINED);
+  client.publish(BASE_TOPIC_STATUS "sat", String(sat), MQTT_RETAINED);
+  client.publish(BASE_TOPIC_STATUS "bri", String(bri), MQTT_RETAINED);
+  client.publish(BASE_TOPIC_STATUS "on", on ? "1" : "0", MQTT_RETAINED);
+  client.publish(BASE_TOPIC "git-version", GIT_VERSION, MQTT_RETAINED);
+  client.publish(BASE_TOPIC "connected", "2", MQTT_RETAINED);
 }
 
 void loop() {
