@@ -13,25 +13,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: fake credentials.h
+        run: |
+          mkdir -p ~/.platformio/lib/Credentials
+          export file=~/.platformio/lib/Credentials/credentials.h
+
+          echo "#pragma once" > $file
+
+          echo '#define WIFI_SSID ""' >> $file
+          echo '#define WIFI_PASSWORD ""' >> $file
+
+          echo '#define MQTT_SERVER ""' >> $file
+          echo '#define MQTT_USERNAME NULL' >> $file
+          echo '#define MQTT_PASSWORD NULL' >> $file
+
+          cat $file
+
       - name: PlatformIO Build
         uses: karniv00l/platformio-run-action@0.1.0
 
-      - name: Package
-        run: |
-          cd .pio/build
-          7z a firmware.zip **/firmware.bin
-          mv firmware.zip ../../
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: firmware
-          path: |
-            *.zip
-
-      - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-             *.zip
+      # No need to upload this as it contains fake credentials anyway
