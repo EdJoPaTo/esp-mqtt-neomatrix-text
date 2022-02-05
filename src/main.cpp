@@ -45,8 +45,8 @@ MQTTKalmanPublish mkRssi(client, BASE_TOPIC_STATUS "rssi", MQTT_RETAINED, 12 * 5
 String text = "hey!";
 uint16_t hue = 120; // green
 uint8_t sat = 100;
-uint8_t bri = 10;
-boolean on = true;
+uint8_t bri = 0;
+boolean on = false;
 
 uint8_t hue8 = hue / 360.0 * 256.0;
 uint8_t sat8 = sat / 100.0 * 255.0;
