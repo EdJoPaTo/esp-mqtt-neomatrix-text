@@ -47,18 +47,12 @@ uint16_t hue = 120; // green
 uint8_t sat = 100;
 uint8_t bri = 10;
 boolean on = true;
-int x = 0;
 
 uint8_t hue8 = hue / 360.0 * 256.0;
 uint8_t sat8 = sat / 100.0 * 255.0;
-
-int textPixelWidth() {
-  return text.length() * 6;
-}
-
-bool isTextLongerThanMatrix() {
-  return textPixelWidth() > matrix.width();
-}
+int x = 0;
+int textPixelWidth = text.length() * 6;
+boolean textIsLongerThanMatrix = textPixelWidth > WIDTH;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -84,7 +78,9 @@ void onConnectionEstablished() {
   client.subscribe(BASE_TOPIC_SET "text", [](const String &payload) {
     if (text != payload) {
       text = payload;
-      x = isTextLongerThanMatrix() ? matrix.width() : 0;
+      textPixelWidth = text.length() * 6;
+      textIsLongerThanMatrix = textPixelWidth > WIDTH;
+      x = textIsLongerThanMatrix ? WIDTH : 0;
       client.publish(BASE_TOPIC_STATUS "text", String(text), MQTT_RETAINED);
     }
   });
@@ -144,27 +140,34 @@ void onConnectionEstablished() {
 void loop() {
   client.loop();
   digitalWrite(LED_BUILTIN, client.isConnected() ? HIGH : LOW);
-  digitalWrite(PIN_ON, on ? HIGH : LOW);
-
-  matrix.fillScreen(0);
-  matrix.setCursor(x, 0);
-  matrix.print(text);
-
-  if (isTextLongerThanMatrix()) {
-    x -= 1;
-    if (x < -textPixelWidth()) {
-      x = matrix.width();
-    }
-  } else {
-    x = 0;
-  }
-
   if (!client.isConnected()) {
     // Keep content until it is connected and updates again
     return;
   }
 
+  digitalWrite(PIN_ON, on ? HIGH : LOW);
+  matrix.fillScreen(0);
+  matrix.setCursor(x, 0);
+  matrix.print(text);
+
   auto now = millis();
+
+  static unsigned long nextMove = 0;
+  if (textIsLongerThanMatrix && now >= nextMove) {
+    nextMove = now + 40;
+
+    x -= 1;
+    if (x < -textPixelWidth) {
+      x = matrix.width();
+    }
+  }
+
+  static unsigned long nextUpdate = 0;
+  if (now >= nextUpdate) {
+    nextUpdate = now + 20;
+    matrix.show();
+  }
+
   static unsigned long nextMeasure = 0;
   if (now >= nextMeasure) {
     nextMeasure = now + 5000;
@@ -172,7 +175,4 @@ void loop() {
     float avgRssi = mkRssi.addMeasurement(rssi);
     Serial.printf("RSSI        in     dBm: %3ld   Average: %6.2f\n", rssi, avgRssi);
   }
-
-  matrix.show();
-  delay(10);
 }
